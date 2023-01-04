@@ -31,7 +31,10 @@ blueprint:
     color:
       name: (Optional) Color - Android Specific
       description: Color for icon. Can be color name or hex value. Leaving blank will use the Home Assistant blue.
-      default: [3, 169, 244]
+      default:
+        - 3
+        - 169
+        - 244
       selector:
         color_rgb:      
     priority:
