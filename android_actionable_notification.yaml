@@ -1,8 +1,7 @@
 blueprint:
-  name: Android Confirmable Notification
+  name: Android Actionable Notification
   description: >-
-    A script that sends an actionable notification with a confirmation before
-    running the specified action.
+    A script that sends an actionable notification to Android devices with up to 3 actionable buttons.
   domain: script
   source_url: https://github.com/home-assistant/core/blob/919f4dd719ac2551ca63a93780852bba1aadd7b0/homeassistant/components/script/blueprints/confirmable_notification.yaml
   input:
