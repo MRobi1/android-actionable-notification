@@ -170,10 +170,12 @@ sequence:
         clickAction: !input 'click_action'
         ttl: 0
         actions:
-          - action: "{{ action_confirm }}"
-            title:  !input confirm_text
-          - action: "{{ action_dismiss }}"
-            title:  !input dismiss_text
+          - action: "{{ first_action }}"
+            title:  !input action_1_title
+          - action: "{{ second_action }}"
+            title:  !input action_2_title
+          - action: "{{ third_action }}"
+            title:  !input action_3_title            
         tag: !input tag
   - alias: "Awaiting response"
     wait_for_trigger:
