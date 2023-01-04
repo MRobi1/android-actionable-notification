@@ -3,14 +3,18 @@ blueprint:
   description: >-
     A script that sends an actionable notification to Android devices with up to 3 actionable buttons.
   domain: script
-  source_url: https://github.com/home-assistant/core/blob/919f4dd719ac2551ca63a93780852bba1aadd7b0/homeassistant/components/script/blueprints/confirmable_notification.yaml
+  source_url: https://github.com/MRobi1/android-actionable-notification/blob/main/android_actionable_notification.yaml
   input:
     notify_device:
-      name: Notification service
-      description: Notification service name (ex. Notify.mobile_app_....). Note that device/s needs to run the official Home Assistant app to receive notifications.
+      name: Device to notify (single device)
+      description: Device needs to run the official Home Assistant app to receive notifications.
       selector:
         device:
           integration: mobile_app
+    notify_group:
+      name: Notification Group
+      description: The name of the notification group to call. IE all_phones
+      default: ''
     title:
       name: "Title"
       description: "The title of the button shown in the notification."
@@ -29,7 +33,7 @@ blueprint:
       selector:
         icon:
     color:
-      name: (Optional) Color - Android Specific
+      name: Color
       description: Color for icon. Can be color name or hex value. Leaving blank will use the Home Assistant blue.
       default:
         - 3
@@ -85,31 +89,66 @@ blueprint:
       default: ''
       selector:
         text:
-    confirm_text:
-      name: "Confirmation Text"
-      description: "Text to show on the confirmation button"
-      default: "Confirm"
-      selector:
-        text:
-    confirm_action:
-      name: "Confirmation Action"
-      description: "Action to run when notification is confirmed"
+# Action 1
+
+    action_1_title:
+      name: First action name
+      description: Name of the first button
+      default: ""
+      
+    action_1_uri:
+      name: URI for action 1 (Optional)
+      description: Optional URI for the first action
+      default: ""
+
+    first_action:
+      name: Action 1
+      description: "Action to run when the first action is clicked"
       default: []
       selector:
         action:
-    dismiss_text:
-      name: "Dismiss Text"
-      description: "Text to show on the dismiss button"
-      default: "Dismiss"
+
+# Action 2
+
+    action_2_title:
+      name: Second action name
+      description: Name of the second button
+      default: ""
+
+    action_2_uri:
+      name: URI for action 1 (Optional)
+      description: Optional URI for the second action
+      default: ""
+
+    second_action:
+      name: Action 2
+      description: Action to run when the second action is clicked"
+      default: []
       selector:
-        text:
-    dismiss_action:
-      name: "Dismiss Action"
-      description: "Action to run when notification is dismissed"
+        action:
+
+# Action 3
+    
+    action_3_title:
+      name: Third action name
+      description: Name of the third button
+      default: ""
+      
+    action_3_uri:
+      name: URI for action 3 (Optional)
+      description: Optional URI for the third action
+      default: ""
+
+    third_action:
+      name: Action 3
+      description: "Action to run when the third action is clicked"
       default: []
       selector:
         action:
 mode: restart
+
+variables:
+  group_target: !input 'notify_group'
 
 sequence:
   - alias: "Set up variables"
