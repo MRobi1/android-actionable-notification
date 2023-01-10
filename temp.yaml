@@ -4,7 +4,7 @@ blueprint:
     A script that sends an actionable notification with a confirmation before
     running the specified action.
   domain: script
-  source_url: https://github.com/home-assistant/core/blob/919f4dd719ac2551ca63a93780852bba1aadd7b0/homeassistant/components/script/blueprints/confirmable_notification.yaml
+  source_url: https://github.com/MRobi1/android-actionable-notification/blob/main/android_actionable_notification.yaml
   input:
     notify_device:
       name: Notification service
@@ -20,6 +20,64 @@ blueprint:
     message:
       name: "Message"
       description: "The message body"
+      selector:
+        text:
+    icon:
+      name: (Optional) Icon
+      description: MDI Icon to use for notification such as mdi:cctv Leaving blank will use the Home Assistant icon.
+      default: ''
+      selector:
+        icon:
+    color:
+      name: (Optional) Color - Android Specific
+      description: Color for icon. Can be color name or hex value. Leaving blank will use the Home Assistant blue.
+      default: ''     
+    priority:
+      name: Notification Priority - Android Specific
+      description: Priority level for notification
+      default: 'default'
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - high
+            - low
+            - max
+            - min
+            - default
+    sticky:
+      name: (Optional) Sticky - Android Specific
+      description: When enabled, the notification will stay active on the device after interacting with it and remain there until cleared.
+      default: false
+      selector:
+        boolean: {}
+    channel:
+      name: (Optional) Channel - Android Specific
+      description: Create a new channel for notifications to allow custom notification sounds, vibration patterns and overide of Do Not Disturb mode. Configured directly on the device.
+      default: ''
+      selector:
+        text:
+    tag:
+      name: "Notification Tag"
+      description: "notification tag for updating and dismissing the notification"
+      default: ''
+      selector:
+        text:
+    timeout:
+        name: "Timeout duration"
+        default: {}
+        selector:
+          duration:
+    image:
+      name: "Image"
+      description: "Path to optional image to attach with message"
+      default: {}
+      selector:
+        text:
+    click_action:
+      name: Click Action
+      description: What to open when the notification is clicked. Can be a URL, a relative URL to your Home Assistant instance such as /lovelace/test, or an Android application such as app://<package_name>. 
+      default: ''
       selector:
         text:
     confirm_text:
@@ -70,6 +128,14 @@ sequence:
       message: !input message 
       title: !input title
       data:
+        color: !input color
+        channel: !input channel
+        sticky: !input sticky
+        notification_icon: !input icon
+        image: !input image
+        importance: !input priority
+        clickAction: !input 'click_action'
+        ttl: 0      
         actions:
           - action: "{{ action_confirm }}"
             title:  !input confirm_text
