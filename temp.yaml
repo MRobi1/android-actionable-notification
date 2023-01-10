@@ -80,30 +80,6 @@ blueprint:
       default: ''
       selector:
         text:
-    confirm_text:
-      name: "Confirmation Text"
-      description: "Text to show on the confirmation button"
-      default: "Confirm"
-      selector:
-        text:
-    confirm_action:
-      name: "Confirmation Action"
-      description: "Action to run when notification is confirmed"
-      default: []
-      selector:
-        action:
-    dismiss_text:
-      name: "Dismiss Text"
-      description: "Text to show on the dismiss button"
-      default: "Dismiss"
-      selector:
-        text:
-    dismiss_action:
-      name: "Dismiss Action"
-      description: "Action to run when notification is dismissed"
-      default: []
-      selector:
-        action:
     tag:
       name: "Notification Tag"
       description: "notification tag for updating and dismissing the notification"
@@ -114,14 +90,38 @@ blueprint:
         name: "Timeout duration"
         default: {}
         selector:
-          duration:
+          duration:        
+    action1_text:
+      name: "Action1 Text"
+      description: "Text to show on the first action button"
+      default: ""
+      selector:
+        text:
+    action1_action:
+      name: "Action1 Action"
+      description: "Action to run when first action button pressed"
+      default: []
+      selector:
+        action:
+    action2_text:
+      name: "Action2 Action"
+      description: "Action to run when second action button pressed"
+      default: ""
+      selector:
+        text:
+    action2_action:
+      name: "Action2 Action"
+      description: "Action to run when first action button pressed"
+      default: []
+      selector:
+        action:
 mode: restart
 
 sequence:
   - alias: "Set up variables"
     variables:
-      action_confirm: "{{ 'CONFIRM_' ~ context.id }}"
-      action_dismiss: "{{ 'DISMISS_' ~ context.id }}"
+      action_action1: "{{ 'action1_' ~ context.id }}"
+      action_action2: "{{ 'action2S_' ~ context.id }}"
   - alias: "Send notification"
     service: !input notify_device
     data:
@@ -137,21 +137,21 @@ sequence:
         clickAction: !input 'click_action'
         ttl: 0      
         actions:
-          - action: "{{ action_confirm }}"
-            title:  !input confirm_text
-          - action: "{{ action_dismiss }}"
-            title:  !input dismiss_text
+          - action: "{{ action_action1 }}"
+            title:  !input action1_text
+          - action: "{{ action_action2 }}"
+            title:  !input action2_text
         tag: !input tag
   - alias: "Awaiting response"
     wait_for_trigger:
       - platform: event
         event_type: mobile_app_notification_action
         event_data:
-          action: "{{ action_confirm }}"
+          action: "{{ action_action1 }}"
       - platform: event
         event_type: mobile_app_notification_action
         event_data:
-          action: "{{ action_dismiss }}"
+          action: "{{ action_action2 }}"
       - platform: event
         event_type: mobile_app_notification_cleared
     timeout: !input timeout
@@ -164,8 +164,8 @@ sequence:
               data:
                 tag: !input tag
           - choose:
-            default: !input dismiss_action
-      - conditions: "{{ wait.trigger.event.data.action == action_confirm }}"
+            default: !input action2_action
+      - conditions: "{{ wait.trigger.event.data.action == action_action1 }}"
         sequence: 
           - service: !input notify_device
             data:
@@ -173,8 +173,8 @@ sequence:
               data:
                 tag: !input tag
           - choose:
-            default: !input confirm_action
-      - conditions: "{{ wait.trigger.event.data.action == action_dismiss }}"
+            default: !input action2_action
+      - conditions: "{{ wait.trigger.event.data.action == action_action2 }}"
         sequence: 
           - service: !input notify_device
             data:
@@ -182,7 +182,7 @@ sequence:
               data:
                 tag: !input tag
           - choose:
-            default: !input dismiss_action
+            default: !input action2_action
       - conditions: "{{ wait.remaining == 0}}"
         sequence: 
           - service: !input notify_device
@@ -191,4 +191,4 @@ sequence:
               data:
                 tag: !input tag
           - choose:
-            default: !input dismiss_action
+            default: !input action2_action
