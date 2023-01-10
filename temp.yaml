@@ -1,0 +1,128 @@
+blueprint:
+  name: Confirmable Notification
+  description: >-
+    A script that sends an actionable notification with a confirmation before
+    running the specified action.
+  domain: script
+  source_url: https://github.com/home-assistant/core/blob/919f4dd719ac2551ca63a93780852bba1aadd7b0/homeassistant/components/script/blueprints/confirmable_notification.yaml
+  input:
+    notify_device:
+      name: Notification service
+      description: Notification service name (ex. Notify.mobile_app_....). Note that device/s needs to run the official Home Assistant app to receive notifications.
+      selector:
+        text:
+    title:
+      name: "Title"
+      description: "The title of the button shown in the notification."
+      default: ""
+      selector:
+        text:
+    message:
+      name: "Message"
+      description: "The message body"
+      selector:
+        text:
+    confirm_text:
+      name: "Confirmation Text"
+      description: "Text to show on the confirmation button"
+      default: "Confirm"
+      selector:
+        text:
+    confirm_action:
+      name: "Confirmation Action"
+      description: "Action to run when notification is confirmed"
+      default: []
+      selector:
+        action:
+    dismiss_text:
+      name: "Dismiss Text"
+      description: "Text to show on the dismiss button"
+      default: "Dismiss"
+      selector:
+        text:
+    dismiss_action:
+      name: "Dismiss Action"
+      description: "Action to run when notification is dismissed"
+      default: []
+      selector:
+        action:
+    tag:
+      name: "Notification Tag"
+      description: "notification tag for updating and dismissing the notification"
+      default: {}
+      selector:
+        text:
+    timeout:
+        name: "Timeout duration"
+        default: {}
+        selector:
+          duration:
+mode: restart
+
+sequence:
+  - alias: "Set up variables"
+    variables:
+      action_confirm: "{{ 'CONFIRM_' ~ context.id }}"
+      action_dismiss: "{{ 'DISMISS_' ~ context.id }}"
+  - alias: "Send notification"
+    service: !input notify_device
+    data:
+      message: !input message 
+      title: !input title
+      data:
+        actions:
+          - action: "{{ action_confirm }}"
+            title:  !input confirm_text
+          - action: "{{ action_dismiss }}"
+            title:  !input dismiss_text
+        tag: !input tag
+  - alias: "Awaiting response"
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ action_confirm }}"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ action_dismiss }}"
+      - platform: event
+        event_type: mobile_app_notification_cleared
+    timeout: !input timeout
+  - choose:
+      - conditions: '{{ wait.trigger.event.event_type == "mobile_app_notification_cleared" }}' 
+        sequence: 
+          - service: !input notify_device
+            data:
+              message: clear_notification
+              data:
+                tag: !input tag
+          - choose:
+            default: !input dismiss_action
+      - conditions: "{{ wait.trigger.event.data.action == action_confirm }}"
+        sequence: 
+          - service: !input notify_device
+            data:
+              message: clear_notification
+              data:
+                tag: !input tag
+          - choose:
+            default: !input confirm_action
+      - conditions: "{{ wait.trigger.event.data.action == action_dismiss }}"
+        sequence: 
+          - service: !input notify_device
+            data:
+              message: clear_notification
+              data:
+                tag: !input tag
+          - choose:
+            default: !input dismiss_action
+      - conditions: "{{ wait.remaining == 0}}"
+        sequence: 
+          - service: !input notify_device
+            data:
+              message: clear_notification
+              data:
+                tag: !input tag
+          - choose:
+            default: !input dismiss_action
